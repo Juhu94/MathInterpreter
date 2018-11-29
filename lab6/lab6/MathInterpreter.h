@@ -1,14 +1,22 @@
 #pragma once
-#include<vector>
 
+#include <string>
+#include <regex>
+#include <iostream>
+#include <fstream>
+#include <map>
 
 class MathInterpreter
 {
 
 private:
+	std::map<std::string, int> hashtable;
 	std::vector<std::string> tokens;
+	std::string printmode;
 	int position = 0;
 	const std::string ETX = "\u0003";
+
+	std::vector<std::string> splitString(std::string& line);
 
 	void evaluate(const std::vector<std::string>& tokens);
 
@@ -31,7 +39,6 @@ private:
 
 public:
 	MathInterpreter(std::ostream& out_stream);
-	MathInterpreter(std::vector<std::string>& tokens);
 	~MathInterpreter();
 };
 

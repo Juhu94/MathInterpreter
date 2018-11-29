@@ -1,0 +1,5 @@
+config dec
+print 1 + 1
+print 3 + 3 * 3
+x = 5 * ( 5 + 15 - 10 )
+print x

@@ -4,110 +4,128 @@
 #include <regex>
 #include <iostream>
 #include <fstream>
+#include <map>
+#include <bitset>
 
 using namespace std;
 
 MathInterpreter::MathInterpreter(std::ostream& out_stream)
 {
-	tokens = {"print","2","*","(","3","+","2",")", };
-
+	
 	//Before submitting code to evaluate , it has to be tokenized	
 	//– i.e. broken down to a sequence of strings representing code elements (numbers, variables, operators etc).
 	//Start by splitting the code into lines, and then into tokens using whitespace as a separator.
 
-	//Läs från fil, Taget från lab3
-	/*string line;
-	ifstream myfile(fileName);
-	if (myfile.is_open())
-	{
-		while (getline(myfile, line))
+
+	string line;
+	ifstream myfile("math_test.txt");
+	if (myfile.is_open()) {
+		while (!myfile.eof())
 		{
-			while (line.length() == 0 && getline(myfile, line))
-				;
-			string name(line);
-			string adress;
-			getline(myfile, adress);
-			reg.LäggTill(&Person(name, adress));
+			getline(myfile, line);
+			tokens = splitString(line);
+			evaluate(tokens);
+			position = 0;
 		}
 		myfile.close();
-		return true;
 	}
 	else {
-		cout << "Unable to open file";
-		return false;
-	}*/
-
-
-	evaluate(tokens);
+		throw std::runtime_error("Unable to open file\n");
+	}
 }
+
+std::vector<std::string> MathInterpreter::splitString(std::string& line) {
+	//cout << line << "\n";
+
+	std::regex reg("\\s+");
+	std::sregex_token_iterator iter(line.begin(), line.end(), reg, -1);
+	std::sregex_token_iterator end;
+
+	std::vector<std::string> vec(iter, end);
+	return vec;
+}
+
 void MathInterpreter::evaluate(const std::vector<std::string>& tokens)
 {
-	cout << "evaluate\n";
+	//cout << "evaluate\n";
 	parse_Stmt();
 }
 //Stmt:= ConfigStmt | AssgStmt | PrintStmt
 void MathInterpreter::parse_Stmt()
 {
+	//cout << "parse_Stmt\n";
 	std::string next_token = peek();
 	if (next_token == "config") {
-		cout << "config\n";
-		consume("config");
+		consume(next_token);
 		parse_ConfigStmt();
 
 	}
 	else if (next_token == "print") {
-		cout << "print\n";
-		consume("print");
+		consume(next_token);
 		parse_PrintStmt();
 	}
 	else if (is_variable(next_token)) {
-		cout << "variable\n";
-		consume(next_token);
-		//Skapa en variable och sen ge den värdet av MathExp(); ???
-
+		parse_AssStmt();
 	}
 }
 
 //ConfigStmt := "config" [ "dec" | "hex" | "bin” ] 
 void MathInterpreter::parse_ConfigStmt() 
 {
-	bool result;
 	std::string next_token = peek();
 	if (next_token == "dec") {
-		consume("dec");
+		printmode = "dec";
+		consume(next_token);
 		//Ställ in utskriften till dec
 	}
 	else if (next_token == "hex") {
-		consume("hex");
+		printmode = next_token;
+		consume(next_token);
 		//Ställ in utskriften till hex
 	}
 	else if (next_token == "bin") {
-		consume("bin");
+		printmode = next_token;
+		consume(next_token);
 		//Ställ in utskriften till bin
 	}
 }
 //AssgStmt := Variable "=" MathExp
 void MathInterpreter::parse_AssStmt() 
 {
-
+	std::string val = peek();
+	consume(val);
+	std::string next_token = peek();
+	if (next_token == "=") {
+		consume(next_token);
+		int sum = parse_MathExp();
+		hashtable[val] = sum;
+	}
 }
 //PrintStmt := "print" MathExp 
 void MathInterpreter::parse_PrintStmt() 
 {
 	int sum = parse_MathExp();
-	cout << "sum = " << sum << "\n";
+	if (printmode == "dec") {
+		cout << sum << "\n";
+	}
+	else if (printmode == "hex") {
+		cout << std::hex << sum << "\n";
+	}
+	else if (printmode == "bin") {
+		cout << std::bitset<32>(sum) << "\n";
+	}
 }
 
 //MathExp := SumExp
 int MathInterpreter::parse_MathExp()
 {
-	cout << "parse_MathExp\n";
+	//cout << "parse_MathExp\n";
 	return parse_SumExp();
 }
 //SumExp := ProductExp [ "+" ProductExp | "–" ProductExp ]*
 int MathInterpreter::parse_SumExp()
 {
-	cout << "parse_SumExp\n";
+	//cout << "parse_SumExp\n";
 	int result = parse_ProductExp();
 
 	std::string next_token = peek();
@@ -131,7 +149,7 @@ int MathInterpreter::parse_SumExp()
 //ProductExp := PrimaryExp [ "*" PrimaryExp | "/" PrimaryExp ]*
 int MathInterpreter::parse_ProductExp()
 {
-	cout << "parse_ProductExcp\n";
+	//cout << "parse_ProductExcp\n";
 	int result = parse_PrimaryExp();
 
 	std::string next_token = peek();
@@ -156,7 +174,7 @@ int MathInterpreter::parse_ProductExp()
 //PrimaryExp := Int | Variable | ( MathExp )
 int MathInterpreter::parse_PrimaryExp()
 {
-	cout << "parse_PrimaryExp\n";
+	//cout << "parse_PrimaryExp\n";
 	int value;
 	std::string next_token = peek();
 	//Int
@@ -180,14 +198,14 @@ int MathInterpreter::parse_PrimaryExp()
 	}
 	//No valid PrimaryExp found, which is an error
 	else
-		throw std::runtime_error("Expected int or ( ) ");
+		throw std::runtime_error("Expected int or ( ) \n");
 
 	return value;
 }
 
 void MathInterpreter::consume(const std::string & token)
 {
-	cout << "consume\n";
+	//cout << "consume\n";
 	std::string next_token = peek();
 	if (next_token == ETX)
 		throw std::runtime_error("Consumed past last token\n");
@@ -220,7 +238,7 @@ bool MathInterpreter::is_int(const std::string & token)
 
 bool MathInterpreter::is_variable(const std::string & token)
 {
-	cout << "is_variable\n";
+	//cout << "is_variable\n";
 	for (int i = 0; i < token.length(); i++) {
 		if (isalpha(token[i])) {
 			return true;
