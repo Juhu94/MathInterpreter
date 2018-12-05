@@ -1,5 +1,7 @@
 ﻿  MathInterpreter.cpp
-e:\random stuff\skola\malmö högskola\datavetenskap - applikationsutveckling - program\c++\laborationer\lab6\lab6\lab6\mathinterpreter.cpp(225): warning C4018: '>=': signed/unsigned mismatch
-e:\random stuff\skola\malmö högskola\datavetenskap - applikationsutveckling - program\c++\laborationer\lab6\lab6\lab6\mathinterpreter.cpp(242): warning C4018: '<': signed/unsigned mismatch
+e:\random stuff\skola\malmö högskola\datavetenskap - applikationsutveckling - program\c++\laborationer\lab6\lab6\lab6\mathinterpreter.cpp(231): warning C4018: '>=': signed/unsigned mismatch
+e:\random stuff\skola\malmö högskola\datavetenskap - applikationsutveckling - program\c++\laborationer\lab6\lab6\lab6\mathinterpreter.cpp(248): warning C4018: '<': signed/unsigned mismatch
+  lab6.cpp
+  Generating Code...
 e:\random stuff\skola\malmö högskola\datavetenskap - applikationsutveckling - program\c++\laborationer\lab6\lab6\lab6\mathinterpreter.cpp(255): warning C4715: 'MathInterpreter::is_variable': not all control paths return a value
   lab6.vcxproj -> E:\Random Stuff\Skola\Malmö Högskola\Datavetenskap - Applikationsutveckling - program\C++\Laborationer\lab6\lab6\Debug\lab6.exe

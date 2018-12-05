@@ -16,7 +16,6 @@ MathInterpreter::MathInterpreter(std::ostream& out_stream)
 	//– i.e. broken down to a sequence of strings representing code elements (numbers, variables, operators etc).
 	//Start by splitting the code into lines, and then into tokens using whitespace as a separator.
 
-
 	string line;
 	ifstream myfile("math_test.txt");
 	if (myfile.is_open()) {
@@ -50,6 +49,7 @@ void MathInterpreter::evaluate(const std::vector<std::string>& tokens)
 	//cout << "evaluate\n";
 	parse_Stmt();
 }
+
 //Stmt:= ConfigStmt | AssgStmt | PrintStmt
 void MathInterpreter::parse_Stmt()
 {
@@ -67,6 +67,9 @@ void MathInterpreter::parse_Stmt()
 	else if (is_variable(next_token)) {
 		parse_AssStmt();
 	}
+	else {
+		throw std::runtime_error("Syntax error, Expected config, print or a variable");
+	}
 }
 
 //ConfigStmt := "config" [ "dec" | "hex" | "bin” ] 
@@ -74,21 +77,25 @@ void MathInterpreter::parse_ConfigStmt()
 {
 	std::string next_token = peek();
 	if (next_token == "dec") {
-		printmode = "dec";
+		cout << std::dec;
 		consume(next_token);
 		//Ställ in utskriften till dec
 	}
 	else if (next_token == "hex") {
-		printmode = next_token;
+		cout << std::hex;
 		consume(next_token);
 		//Ställ in utskriften till hex
 	}
 	else if (next_token == "bin") {
-		printmode = next_token;
+		cout << std::bitset<32>();
 		consume(next_token);
 		//Ställ in utskriften till bin
 	}
+	else {
+		throw std::runtime_error("Expected dec, hex, or bin as configuration");
+	}
 }
+
 //AssgStmt := Variable "=" MathExp
 void MathInterpreter::parse_AssStmt() 
 {
@@ -100,20 +107,15 @@ void MathInterpreter::parse_AssStmt()
 		int sum = parse_MathExp();
 		hashtable[val] = sum;
 	}
+	else {
+		throw std::runtime_error("Expected = ");
+	}
 }
 //PrintStmt := "print" MathExp 
 void MathInterpreter::parse_PrintStmt() 
 {
 	int sum = parse_MathExp();
-	if (printmode == "dec") {
-		cout << sum << "\n";
-	}
-	else if (printmode == "hex") {
-		cout << std::hex << sum << "\n";
-	}
-	else if (printmode == "bin") {
-		cout << std::bitset<32>(sum) << "\n";
-	}
+	cout << sum << "\n";
 }
 
 //MathExp := SumExp
@@ -122,6 +124,7 @@ int MathInterpreter::parse_MathExp()
 	//cout << "parse_MathExp\n";
 	return parse_SumExp();
 }
+
 //SumExp := ProductExp [ "+" ProductExp | "–" ProductExp ]*
 int MathInterpreter::parse_SumExp()
 {
@@ -184,7 +187,9 @@ int MathInterpreter::parse_PrimaryExp()
 	}
 	//Variable
 	else if (is_variable(next_token)) {
-		value = std::stoi(next_token);
+		auto it = hashtable.find(next_token);
+		if (it != hashtable.end())
+			value = it->second;
 		consume(next_token);
 	}
 	//(MathExp)
@@ -246,14 +251,7 @@ bool MathInterpreter::is_variable(const std::string & token)
 		else
 			return false;
 	}
-	/*std::regex reg("[a-zA-z] [a-zA-z0-9]*");
-	if (std::regex_match(token, reg))
-		return true;
-	else
-		return false;
-	*/
 }
-
 
 MathInterpreter::~MathInterpreter()
 {

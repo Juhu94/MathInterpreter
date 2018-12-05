@@ -12,7 +12,6 @@ class MathInterpreter
 private:
 	std::map<std::string, int> hashtable;
 	std::vector<std::string> tokens;
-	std::string printmode;
 	int position = 0;
 	const std::string ETX = "\u0003";
 
